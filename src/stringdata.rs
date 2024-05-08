@@ -1,13 +1,16 @@
 use std::fmt::Display;
 
-use crate::{strings::{SizedString, StringEncoding}, LinkFlags};
+use crate::{
+    strings::{SizedString, StringEncoding},
+    LinkFlags,
+};
 use binrw::BinRead;
 use encoding_rs::Encoding;
 use getset::Getters;
 use serde::Serialize;
 
 #[derive(BinRead, Default, Getters, Debug, Serialize)]
-#[getset(get="pub")]
+#[getset(get = "pub")]
 #[br(import(link_flags: LinkFlags, default_codepage: &'static Encoding))]
 pub struct StringData {
     /// NAME_STRING: An optional structure that specifies a description of the

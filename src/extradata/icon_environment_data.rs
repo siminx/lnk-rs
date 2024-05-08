@@ -2,11 +2,10 @@ use binrw::BinRead;
 use encoding_rs::{UTF_16LE, Encoding};
 use getset::Getters;
 
-#[cfg(feature="serde")]
+#[cfg(feature = "serde")]
 use serde::Serialize;
 
 use crate::strings::FixedSizeString;
-
 
 /// The IconEnvironmentDataBlock structure specifies the path to an
 /// icon. The path is encoded using environment variables, which makes

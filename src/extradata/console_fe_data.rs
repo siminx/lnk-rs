@@ -1,7 +1,7 @@
 use binrw::BinRead;
 use getset::Getters;
 
-#[cfg(feature="serde")]
+#[cfg(feature = "serde")]
 use serde::Serialize;
 
 /// The ConsoleFEDataBlock structure specifies the code page to use
@@ -10,7 +10,7 @@ use serde::Serialize;
 #[derive(Clone, Copy, Debug, BinRead, Getters)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 #[br(import(block_size: u32), pre_assert(block_size == 0x0000_0000C))]
-#[get(get="pub")]
+#[get(get = "pub")]
 #[allow(unused)]
 pub struct ConsoleFEDataBlock {
     /// A 32-bit, unsigned integer that specifies a code page language

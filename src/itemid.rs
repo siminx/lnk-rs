@@ -5,11 +5,10 @@ use byteorder::{ByteOrder, LE};
 use getset::Getters;
 use serde::Serialize;
 
-
 /// The stored IDList structure specifies the format of a persisted item ID list.
 #[derive(Clone, BinRead, Default, Getters)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-#[getset(get="pub")]
+#[getset(get = "pub")]
 pub struct ItemID {
     /// A 16-bit, unsigned integer that specifies the size, in bytes, of the ItemID structure,
     /// including the ItemIDSize field.

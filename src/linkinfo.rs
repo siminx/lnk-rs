@@ -12,7 +12,7 @@ use crate::{
     CurrentOffset,
 };
 
-#[cfg(feature="serde")]
+#[cfg(feature = "serde")]
 use serde::Serialize;
 
 /// The LinkInfo structure specifies information necessary to resolve a
@@ -23,7 +23,7 @@ use serde::Serialize;
 /// paths, see [MS-DFSNM] section 2.2.1.4
 #[derive(Debug, BinRead, Getters)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-#[getset(get="pub")]
+#[getset(get = "pub")]
 #[allow(unused)]
 #[br(import(default_codepage: &'static Encoding))]
 pub struct LinkInfo {
@@ -177,7 +177,7 @@ pub struct LinkInfo {
         args(default_codepage)
     )]
     common_network_relative_link: Option<CommonNetworkRelativeLink>,
-    
+
     /// A NULL–terminated string, defined by the system default code page,
     /// which is used to construct the full path to the link item or link
     /// target by being appended to the string in the LocalBasePath field.
@@ -273,7 +273,8 @@ impl LinkInfoFlags {
     }
 
     pub fn has_common_network_relative_link_and_path_suffix(&self) -> bool {
-        *self & Self::COMMON_NETWORK_RELATIVE_LINK_AND_PATH_SUFFIX == Self::COMMON_NETWORK_RELATIVE_LINK_AND_PATH_SUFFIX
+        *self & Self::COMMON_NETWORK_RELATIVE_LINK_AND_PATH_SUFFIX
+            == Self::COMMON_NETWORK_RELATIVE_LINK_AND_PATH_SUFFIX
     }
 }
 
@@ -282,7 +283,7 @@ impl LinkInfoFlags {
 /// resolving the link if the file is not found in its original location.
 #[derive(Clone, Debug, BinRead, Getters)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-#[get(get="pub")]
+#[get(get = "pub")]
 #[allow(unused)]
 #[br(import(default_codepage: &'static Encoding))]
 pub struct VolumeID {
@@ -415,7 +416,7 @@ pub struct CommonNetworkRelativeLink {
     /// zero.
     #[br(
         assert(
-            device_name_offset < common_network_relative_link_size && 
+            device_name_offset < common_network_relative_link_size &&
             if flags.has_valid_device() {
                 device_name_offset > 0
             } else {
@@ -501,12 +502,14 @@ impl CommonNetworkRelativeLink {
     /// returns the name of this link
     pub fn name(&self) -> String {
         if self.flags.has_valid_device() {
-            self.device_name_unicode.as_ref()
+            self.device_name_unicode
+                .as_ref()
                 .or(self.device_name.as_ref())
                 .expect("device name must be set, if VALID_DEVICE is set")
                 .to_string()
         } else if self.flags.has_valid_net_type() {
-            self.net_name_unicode.as_ref()
+            self.net_name_unicode
+                .as_ref()
                 .unwrap_or(&self.net_name)
                 .to_string()
         } else {

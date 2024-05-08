@@ -35,18 +35,18 @@
 use binrw::BinReaderExt;
 use encoding_rs::Encoding;
 use getset::Getters;
-#[cfg(feature="serde")]
-use serde::Serialize;
-use thiserror::Error;
 #[allow(unused)]
 use log::{debug, error, info, trace, warn};
+#[cfg(feature = "serde")]
+use serde::Serialize;
+use thiserror::Error;
 
-use std::{fs::File, io::Seek};
-#[cfg(feature = "experimental_save")]
-use std::io::BufWriter;
 use std::io::BufReader;
 #[cfg(feature = "experimental_save")]
+use std::io::BufWriter;
+#[cfg(feature = "experimental_save")]
 use std::path::Path;
+use std::{fs::File, io::Seek};
 
 mod header;
 pub use header::{
@@ -115,7 +115,7 @@ pub enum Error {
 /// A shell link
 #[derive(Debug, Getters)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-#[getset(get="pub")]
+#[getset(get = "pub")]
 pub struct ShellLink {
     /// returns the [`ShellLinkHeader`] structure
     header: header::ShellLinkHeader,
@@ -126,7 +126,7 @@ pub struct ShellLink {
 
     /// returns the [`LinkInfo`] structure
     link_info: Option<linkinfo::LinkInfo>,
-    
+
     /// returns the [`StringData`] structure
     string_data: StringData,
 
@@ -281,13 +281,16 @@ impl ShellLink {
     }
 
     /// Open and parse a shell link
-    pub fn open<P: AsRef<std::path::Path>>(path: P, default_codepage: &'static Encoding) -> Result<Self, Error> {
+    pub fn open<P: AsRef<std::path::Path>>(
+        path: P,
+        default_codepage: &'static Encoding,
+    ) -> Result<Self, Error> {
         debug!("Opening {:?}", path.as_ref());
         let mut reader = BufReader::new(File::open(path)?);
         //let mut data = vec![];
         trace!("Reading file.");
         //r.read_to_end(&mut data)?;
-        
+
         //trace!("Parsing shell header.");
         //if data.len() < 0x4c {
         //    return Err(Error::NotAShellLinkError);
@@ -298,7 +301,10 @@ impl ShellLink {
         let mut linktarget_id_list = None;
         let link_flags = *shell_link_header.link_flags();
         if link_flags.contains(LinkFlags::HAS_LINK_TARGET_ID_LIST) {
-            debug!("A LinkTargetIDList is marked as present. Parsing now at position 0x{:0x}", reader.stream_position()?);
+            debug!(
+                "A LinkTargetIDList is marked as present. Parsing now at position 0x{:0x}",
+                reader.stream_position()?
+            );
             let list: LinkTargetIdList = reader.read_le()?;
             debug!("{:?}", list);
             linktarget_id_list = Some(list);
@@ -306,7 +312,10 @@ impl ShellLink {
 
         let mut link_info = None;
         if link_flags.contains(LinkFlags::HAS_LINK_INFO) {
-            debug!("LinkInfo is marked as present. Parsing now at position 0x{:0x}", reader.stream_position()?);
+            debug!(
+                "LinkInfo is marked as present. Parsing now at position 0x{:0x}",
+                reader.stream_position()?
+            );
             let info: LinkInfo = reader.read_le_args((default_codepage,))?;
             debug!("{:?}", info);
             link_info = Some(info);
@@ -336,23 +345,27 @@ impl ShellLink {
     /// of this method will be `None`
     pub fn link_target(&self) -> Option<String> {
         if let Some(info) = self.link_info().as_ref() {
-            let base_path = if info.link_info_flags().has_common_network_relative_link_and_path_suffix() {
-                info.common_network_relative_link().as_ref().expect("missing common network relative link").name()
+            let base_path = if info
+                .link_info_flags()
+                .has_common_network_relative_link_and_path_suffix()
+            {
+                info.common_network_relative_link()
+                    .as_ref()
+                    .expect("missing common network relative link")
+                    .name()
             } else {
                 info.local_base_path_unicode()
                     .as_ref()
                     .map(|s| &s[..])
                     .or(info.local_base_path())
-                    .expect("missing local base path").to_string()
+                    .expect("missing local base path")
+                    .to_string()
             };
 
-            let separator = if base_path.ends_with('\\') {
-                ""
-            } else {
-                "\\"
-            };
+            let separator = if base_path.ends_with('\\') { "" } else { "\\" };
 
-            let common_path = info.common_path_suffix_unicode()
+            let common_path = info
+                .common_path_suffix_unicode()
                 .as_ref()
                 .map(|s| &s[..])
                 .unwrap_or(info.common_path_suffix());

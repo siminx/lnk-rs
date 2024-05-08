@@ -5,7 +5,7 @@ use getset::Getters;
 
 use crate::{binread_flags::binread_flags, strings::FixedSizeString};
 
-#[cfg(feature="serde")]
+#[cfg(feature = "serde")]
 use serde::Serialize;
 
 bitflags! {

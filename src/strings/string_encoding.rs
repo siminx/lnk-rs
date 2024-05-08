@@ -1,4 +1,3 @@
-
 use encoding_rs::Encoding;
 
 use crate::LinkFlags;

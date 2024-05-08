@@ -4,7 +4,7 @@ use binrw::BinRead;
 use encoding_rs::UTF_16LE;
 use getset::Getters;
 
-#[cfg(feature="serde")]
+#[cfg(feature = "serde")]
 use serde::Serialize;
 
 use crate::strings::FixedSizeString;

@@ -3,17 +3,16 @@ use encoding_rs::Encoding;
 #[allow(unused)]
 use log::{debug, error, info, trace, warn};
 
-#[cfg(feature="serde")]
+#[cfg(feature = "serde")]
 use serde::Serialize;
 
 use self::{
     console_data::ConsoleDataBlock, console_fe_data::ConsoleFEDataBlock,
     darwin_data::DarwinDataBlock, environment_variable_data::EnvironmentVariableDataBlock,
     icon_environment_data::IconEnvironmentDataBlock, known_folder_data::KnownFolderDataBlock,
-    property_store_data::PropertyStoreDataBlock, shim_data::ShimDataBlock,
-    special_folder_data::SpecialFolderDataBlock, tracker_data::TrackerDataBlock,
-    vista_and_above_id_list_data::VistaAndAboveIdListDataBlock,
-    shell_item_identifiers::ShellItemIdentifiers,
+    property_store_data::PropertyStoreDataBlock, shell_item_identifiers::ShellItemIdentifiers,
+    shim_data::ShimDataBlock, special_folder_data::SpecialFolderDataBlock,
+    tracker_data::TrackerDataBlock, vista_and_above_id_list_data::VistaAndAboveIdListDataBlock,
 };
 
 /// The ConsoleDataBlock structure specifies the display settings to use
@@ -79,7 +78,6 @@ pub mod vista_and_above_id_list_data;
 /// data section that is appended to the basic Shell Link Binary File Format.
 ///
 /// At the moment, ExtraData can only be read, not written to shortcuts
-
 mod shell_item_identifiers;
 
 #[allow(missing_docs)]
@@ -88,19 +86,19 @@ mod shell_item_identifiers;
 #[br(import(_block_size: u32, _default_codepage: &'static Encoding))]
 pub enum ExtraDataBlock {
     #[br(magic = 0xa0000001u32)]
-    EnvironmentProps(#[br(args(_block_size,_default_codepage))] EnvironmentVariableDataBlock),
+    EnvironmentProps(#[br(args(_block_size, _default_codepage))] EnvironmentVariableDataBlock),
     #[br(magic = 0xa0000002u32)]
     ConsoleProps(#[br(args(_block_size))] ConsoleDataBlock),
     #[br(magic = 0xa0000003u32)]
-    TrackerProps(#[br(args(_block_size,_default_codepage))] TrackerDataBlock),
+    TrackerProps(#[br(args(_block_size, _default_codepage))] TrackerDataBlock),
     #[br(magic = 0xa0000004u32)]
     ConsoleFeProps(#[br(args(_block_size))] ConsoleFEDataBlock),
     #[br(magic = 0xa0000005u32)]
     SpecialFolderProps(#[br(args(_block_size))] SpecialFolderDataBlock),
     #[br(magic = 0xa0000006u32)]
-    DarwinProps(#[br(args(_block_size,_default_codepage))] DarwinDataBlock),
+    DarwinProps(#[br(args(_block_size, _default_codepage))] DarwinDataBlock),
     #[br(magic = 0xa0000007u32)]
-    IconEnvironmentProps(#[br(args(_block_size,_default_codepage))] IconEnvironmentDataBlock),
+    IconEnvironmentProps(#[br(args(_block_size, _default_codepage))] IconEnvironmentDataBlock),
     #[br(magic = 0xa0000008u32)]
     ShimProps(#[br(args(_block_size))] ShimDataBlock),
     #[br(magic = 0xa0000009u32)]
@@ -134,7 +132,7 @@ impl BinRead for ExtraData {
             if block_size == 0 {
                 break;
             } else {
-                let block: ExtraDataBlock = reader.read_le_args((block_size,args.0))?;
+                let block: ExtraDataBlock = reader.read_le_args((block_size, args.0))?;
                 blocks.push(block);
             }
         }

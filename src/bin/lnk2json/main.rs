@@ -24,12 +24,13 @@ fn main() -> anyhow::Result<()> {
         cli.verbose.log_level_filter(),
         Config::default(),
         TerminalMode::Stderr,
-        ColorChoice::Auto);
-    
-    if ! cli.input_file.path().exists() {
+        ColorChoice::Auto,
+    );
+
+    if !cli.input_file.path().exists() {
         anyhow::bail!("the file you specified does not exist");
     }
-    if ! cli.input_file.path().is_file() {
+    if !cli.input_file.path().is_file() {
         anyhow::bail!("you did not specify a file");
     }
 
@@ -38,7 +39,7 @@ fn main() -> anyhow::Result<()> {
     if cli.pretty {
         println!("{}", serde_json::to_string_pretty(&shell_link)?);
     } else {
-        println!("{}", serde_json::to_string(&shell_link)?);        
+        println!("{}", serde_json::to_string(&shell_link)?);
     }
     Ok(())
 }
