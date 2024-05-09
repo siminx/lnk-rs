@@ -4,6 +4,7 @@ version = "0.5.1"
 authors = [
     "Lily Hopkins <bsalarius@gmail.com>",
     "Simon Buchan <simon.buchan.nz@gmail.com>",
+    "Jan Starke <jan.starke@posteo.de>",
 ]
 edition = "2021"
 description = "A Rust library to parse and write Windows shortcut files (.lnk)"
@@ -13,9 +14,8 @@ repository = "https://github.com/lilopkins/lnk-rs"
 [features]
 default = ["serde"]
 experimental_save = []
-serde=["dep:serde", "serde_json"]
-lnk2json=["serde", "clap", "simplelog", "clap-verbosity-flag", "clio", "anyhow"]
-
+serde=["dep:serde", "serde_json", "bitflags/serde"]
+lnk2json=["serde", "dep:clap", "dep:simplelog", "dep:clap-verbosity-flag", "dep:clio", "dep:anyhow"]
 
 [[bin]]
 name = "lnk2json"
@@ -32,8 +32,7 @@ required-features = ["experimental_save"]
 
 [dependencies]
 log = "0.4.11"
-bitflags = {version="2.4", features=["serde"]}
-byteorder = "1.3.4"
+bitflags = "2.4"
 chrono = "0.4.23"
 num-traits = "0.2.14"
 num-derive = "0.4"

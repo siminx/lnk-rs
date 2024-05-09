@@ -75,22 +75,18 @@ mod stringdata;
 pub mod extradata;
 pub use extradata::ExtraData;
 
-mod filetime;
-pub use filetime::FileTime;
+mod generic_types;
+pub use generic_types::filetime::FileTime;
+pub use generic_types::guid::*;
+pub use generic_types::idlist::*;
 
 mod current_offset;
 pub use current_offset::*;
 
 use crate::stringdata::StringData;
 
-mod guid;
-pub use guid::*;
-
 mod strings;
 pub use strings::*;
-
-mod idlist;
-pub use idlist::*;
 
 mod itemid;
 pub use itemid::*;
@@ -287,14 +283,8 @@ impl ShellLink {
     ) -> Result<Self, Error> {
         debug!("Opening {:?}", path.as_ref());
         let mut reader = BufReader::new(File::open(path)?);
-        //let mut data = vec![];
         trace!("Reading file.");
-        //r.read_to_end(&mut data)?;
-
-        //trace!("Parsing shell header.");
-        //if data.len() < 0x4c {
-        //    return Err(Error::NotAShellLinkError);
-        //}
+        
         let shell_link_header: ShellLinkHeader = reader.read_le()?;
         debug!("Shell header: {:#?}", shell_link_header);
 

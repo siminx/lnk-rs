@@ -1,4 +1,3 @@
-#![allow(missing_docs)]
 use std::mem::size_of;
 
 use binrw::BinWrite;
@@ -11,17 +10,24 @@ use num_derive::FromPrimitive;
 #[cfg(feature = "serde")]
 use serde::Serialize;
 
-use crate::binread_flags::*;
-
 use crate::FileTime;
 use crate::Guid;
+
+mod hotkey_flags;
+pub use hotkey_flags::{HotkeyFlags, HotkeyKey, HotkeyModifiers};
+
+mod link_flags;
+pub use link_flags::LinkFlags;
+
+mod file_attributes_flags;
+pub use file_attributes_flags::FileAttributeFlags;
 
 #[allow(clippy::unusual_byte_groupings)]
 
 /// A ShellLinkHeader structure (section 2.1), which contains identification
 /// information, timestamps, and flags that specify the presence of optional
 /// structures.
-#[derive(Clone, Debug, Getters, MutGetters, Setters)]
+#[derive(BinRead, Clone, Debug, Getters, MutGetters, Setters)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 #[binrw]
 #[br(little)]
@@ -34,6 +40,7 @@ pub struct ShellLinkHeader {
     /// This value MUST be 00021401-0000-0000-C000-000000000046.
     #[br(assert(link_clsid == Guid::from(uuid::uuid!("00021401-0000-0000-C000-000000000046"))))]
     link_clsid: Guid,
+
     /// A LinkFlags structure (section 2.1.1) that specifies information about the shell link and
     /// the presence of optional portions of the structure.
     link_flags: LinkFlags,

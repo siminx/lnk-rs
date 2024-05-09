@@ -26,17 +26,3 @@ impl fmt::Debug for ItemID {
         write!(f, "ItemID (raw data size {})", self.size)
     }
 }
-
-impl From<ItemID> for Vec<u8> {
-    fn from(val: ItemID) -> Self {
-        let mut data = Vec::new();
-
-        assert_eq!(val.data.len() as u16 + 2, val.size);
-
-        LE::write_u16(&mut data, val.size);
-        let mut other_data = val.data.clone();
-        data.append(&mut other_data);
-
-        data
-    }
-}

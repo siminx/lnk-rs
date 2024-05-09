@@ -2,7 +2,7 @@ use binrw::BinRead;
 use getset::Getters;
 use serde::Serialize;
 
-use crate::idlist::IdList;
+use crate::generic_types::idlist::IdList;
 
 #[derive(Clone, Debug, BinRead, Getters)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
