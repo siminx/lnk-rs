@@ -32,7 +32,7 @@
 //!
 //! > **IMPORTANT!**: Writing capability is currently in a very early stage and probably won't work!
 
-use binread::BinReaderExt;
+use binrw::BinReaderExt;
 use encoding_rs::Encoding;
 use getset::Getters;
 #[cfg(feature="serde")]
@@ -109,7 +109,7 @@ pub enum Error {
     NotAShellLinkError,
 
     #[error("Error while parsing: {0}")]
-    BinReadError(#[from] binread::Error)
+    BinReadError(#[from] binrw::Error)
 }
 
 /// A shell link

@@ -1,4 +1,4 @@
-use binread::BinRead;
+use binrw::BinRead;
 use getset::Getters;
 use serde::Serialize;
 

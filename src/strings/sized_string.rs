@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use binread::{BinRead, BinReaderExt};
+use binrw::{BinRead, BinReaderExt};
 use encoding_rs::UTF_16LE;
 use log::trace;
 
@@ -13,13 +13,13 @@ use crate::StringEncoding;
 pub struct SizedString(String);
 
 impl BinRead for SizedString {
-    type Args = (StringEncoding,);
+    type Args<'a> = (StringEncoding,);
 
-    fn read_options<R: std::io::prelude::Read + std::io::prelude::Seek>(
+    fn read_options<R: std::io::Read + std::io::Seek>(
         reader: &mut R,
-        _options: &binread::ReadOptions,
-        args: Self::Args,
-    ) -> binread::prelude::BinResult<Self> {
+        _endian: binrw::Endian,
+        args: Self::Args<'_>,
+    ) -> binrw::BinResult<Self> {
         let count_characters: u16 = reader.read_le()?;
         trace!(
             "reading sized string of size '{count_characters}' at 0x{:08x}",
@@ -32,7 +32,7 @@ impl BinRead for SizedString {
                 reader.read_exact(&mut buffer)?;
                 let (cow, _, had_errors) = default_encoding.decode(&buffer);
                 if had_errors {
-                    return Err(binread::error::Error::AssertFail {
+                    return Err(binrw::error::Error::AssertFail {
                         pos: reader.stream_position()?,
                         message: format!(
                             "unable to decode String to CP1252 from buffer {buffer:?}"
@@ -46,7 +46,7 @@ impl BinRead for SizedString {
                 reader.read_exact(&mut buffer)?;
                 let (cow, _, had_errors) = UTF_16LE.decode(&buffer);
                 if had_errors {
-                    return Err(binread::error::Error::AssertFail {
+                    return Err(binrw::error::Error::AssertFail {
                         pos: reader.stream_position()?,
                         message: format!(
                             "unable to decode String to UTF-16LE from buffer {buffer:?}"

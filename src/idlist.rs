@@ -1,4 +1,4 @@
-use binread::{BinRead, BinReaderExt};
+use binrw::{BinRead, BinReaderExt};
 use getset::Getters;
 use log::trace;
 use serde::Serialize;
@@ -16,13 +16,13 @@ pub struct IdList {
 }
 
 impl BinRead for IdList {
-    type Args = (u16,);
+    type Args<'a> = (u16,);
 
-    fn read_options<R: std::io::prelude::Read + std::io::prelude::Seek>(
+    fn read_options<R: std::io::Read + std::io::Seek>(
         reader: &mut R,
-        _options: &binread::ReadOptions,
-        args: Self::Args,
-    ) -> binread::prelude::BinResult<Self> {
+        _endian: binrw::Endian,
+        args: Self::Args<'_>,
+    ) -> binrw::BinResult<Self> {
         let mut item_id_list = Vec::new();
         let mut bytes_to_read = args.0;
         trace!("ID List size: {bytes_to_read}");
@@ -33,7 +33,7 @@ impl BinRead for IdList {
             // So, if there are less than 2 bytes available, there
             // is something wrong
             if bytes_to_read < 2 {
-                return Err(binread::error::Error::AssertFail{
+                return Err(binrw::error::Error::AssertFail{
                     pos: reader.stream_position()?,
                     message: "not enough bytes to read".to_string(),
                 });

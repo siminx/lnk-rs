@@ -1,4 +1,4 @@
-use binread::BinRead;
+use binrw::BinRead;
 use encoding_rs::{Encoding, UTF_16LE};
 use getset::Getters;
 

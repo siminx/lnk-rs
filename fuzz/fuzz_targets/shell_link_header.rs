@@ -3,7 +3,7 @@
 use libfuzzer_sys::fuzz_target;
 use lnk::ShellLinkHeader;
 use std::io::Cursor;
-use binread::BinReaderExt;
+use binrw::BinReaderExt;
 
 fuzz_target!(|data: &[u8]| {
     let mut cursor = Cursor::new(data);

@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use crate::{strings::{SizedString, StringEncoding}, LinkFlags};
-use binread::BinRead;
+use binrw::BinRead;
 use encoding_rs::Encoding;
 use getset::Getters;
 use serde::Serialize;

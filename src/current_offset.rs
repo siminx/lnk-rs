@@ -1,4 +1,4 @@
-use binread::{io::StreamPosition, BinRead};
+use binrw::BinRead;
 use log::trace;
 
 /// implements [`BinRead`] by reading the current cursor position
@@ -7,14 +7,14 @@ use log::trace;
 pub struct CurrentOffset(u32);
 
 impl BinRead for CurrentOffset {
-    type Args = ();
+    type Args<'a> = ();
 
-    fn read_options<R: std::io::prelude::Read + std::io::prelude::Seek>(
+    fn read_options<R: std::io::Read + std::io::Seek>(
         reader: &mut R,
-        _options: &binread::ReadOptions,
-        _args: Self::Args,
-    ) -> binread::prelude::BinResult<Self> {
-        let pos = reader.stream_pos()?;
+        _endian: binrw::Endian,
+        _args: Self::Args<'_>,
+    ) -> binrw::BinResult<Self> {
+        let pos = reader.stream_position()?;
         trace!("read offset at 0x{pos:016x}");
         Ok(Self(pos.try_into().expect("invalid offset")))
     }

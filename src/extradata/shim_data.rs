@@ -1,6 +1,6 @@
 use std::mem::size_of;
 
-use binread::BinRead;
+use binrw::BinRead;
 use encoding_rs::UTF_16LE;
 use getset::Getters;
 

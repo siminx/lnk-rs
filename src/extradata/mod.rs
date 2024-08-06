@@ -1,4 +1,4 @@
-use binread::{BinRead, BinReaderExt};
+use binrw::{BinRead, BinReaderExt};
 use encoding_rs::Encoding;
 #[allow(unused)]
 use log::{debug, error, info, trace, warn};
@@ -121,13 +121,13 @@ pub struct ExtraData {
 }
 
 impl BinRead for ExtraData {
-    type Args = (&'static Encoding,);
+    type Args<'a> = (&'static Encoding,);
 
-    fn read_options<R: std::io::prelude::Read + std::io::prelude::Seek>(
+    fn read_options<R: std::io::Read + std::io::Seek>(
         reader: &mut R,
-        _options: &binread::ReadOptions,
-        args: Self::Args,
-    ) -> binread::prelude::BinResult<Self> {
+        _endian: binrw::Endian,
+        args: Self::Args<'_>,
+    ) -> binrw::BinResult<Self> {
         let mut blocks = Vec::new();
         loop {
             let block_size: u32 = reader.read_le()?;

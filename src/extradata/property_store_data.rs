@@ -3,7 +3,7 @@ use std::{fmt, mem::size_of};
 #[cfg(feature="serde")]
 use serde::Serialize;
 
-use binread::BinRead;
+use binrw::BinRead;
 use getset::Getters;
 
 /// A PropertyStoreDataBlock structure specifies a set of properties

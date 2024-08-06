@@ -1,19 +1,19 @@
-use binread::BinRead;
-use substring::Substring;
+use binrw::BinRead;
 use core::fmt::Display;
 use encoding_rs::Encoding;
+use substring::Substring;
 
 /// represents a string that is stored in a buffer of a fixed size
 #[derive(Clone, Debug)]
 pub struct FixedSizeString(String);
 
 impl BinRead for FixedSizeString {
-    type Args = (usize, &'static Encoding);
-    fn read_options<R: std::io::prelude::Read + std::io::prelude::Seek>(
+    type Args<'a> = (usize, &'static Encoding);
+    fn read_options<R: std::io::Read + std::io::Seek>(
         reader: &mut R,
-        _options: &binread::ReadOptions,
-        args: Self::Args,
-    ) -> binread::prelude::BinResult<Self> {
+        _endian: binrw::Endian,
+        args: Self::Args<'_>,
+    ) -> binrw::BinResult<Self> {
         let count = args.0;
         let encoding = args.1;
         let mut buffer = vec![0; count];
@@ -21,7 +21,7 @@ impl BinRead for FixedSizeString {
 
         let (cow, _, had_errors) = encoding.decode(&buffer[..]);
         if had_errors {
-            return Err(binread::error::Error::AssertFail {
+            return Err(binrw::error::Error::AssertFail {
                 pos: reader.stream_position()?,
                 message: format!(
                     "unable to decode String to {} from buffer {buffer:?}",
@@ -50,7 +50,6 @@ impl AsRef<str> for FixedSizeString {
 }
 
 impl FixedSizeString {
-
     /// returns `true` if the string is empty and `false` otherwise
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()

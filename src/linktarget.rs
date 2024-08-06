@@ -1,4 +1,4 @@
-use binread::BinRead;
+use binrw::BinRead;
 use byteorder::{ByteOrder, LE};
 #[allow(unused)]
 use log::{debug, error, info, trace, warn};

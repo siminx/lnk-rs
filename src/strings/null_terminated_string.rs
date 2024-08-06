@@ -1,4 +1,4 @@
-use binread::{BinRead, BinReaderExt, NullWideString};
+use binrw::{BinRead, BinReaderExt, NullWideString};
 use core::fmt::Display;
 
 use crate::StringEncoding;
@@ -8,13 +8,13 @@ use crate::StringEncoding;
 pub struct NullTerminatedString(String);
 
 impl BinRead for NullTerminatedString {
-    type Args = (StringEncoding,);
+    type Args<'a> = (StringEncoding,);
 
-    fn read_options<R: std::io::prelude::Read + std::io::prelude::Seek>(
+    fn read_options<R: std::io::Read + std::io::Seek>(
         reader: &mut R,
-        _options: &binread::ReadOptions,
-        args: Self::Args,
-    ) -> binread::prelude::BinResult<Self> {
+        _endian: binrw::Endian,
+        args: Self::Args<'_>,
+    ) -> binrw::BinResult<Self> {
         match args.0 {
             StringEncoding::CodePage(default_codepage) => {
                 let mut buffer = Vec::new();
@@ -28,7 +28,7 @@ impl BinRead for NullTerminatedString {
                 }
                 let (cow, _, had_errors) = default_codepage.decode(&buffer);
                 if had_errors {
-                    return Err(binread::error::Error::AssertFail {
+                    return Err(binrw::error::Error::AssertFail {
                         pos: reader.stream_position()?,
                         message: format!(
                             "unable to decode String to CP1252 from buffer {buffer:?}"

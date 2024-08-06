@@ -1,6 +1,6 @@
 use std::fmt;
 
-use binread::{BinRead, BinReaderExt};
+use binrw::{BinRead, BinReaderExt};
 use chrono::NaiveDateTime;
 
 #[cfg(feature = "serde")]
@@ -20,19 +20,19 @@ impl fmt::Debug for FileTime {
 }
 
 impl BinRead for FileTime {
-    type Args = ();
+    type Args<'a> = ();
 
-    fn read_options<R: std::io::prelude::Read + std::io::prelude::Seek>(
+    fn read_options<R: std::io::Read + std::io::Seek>(
         reader: &mut R,
-        _options: &binread::ReadOptions,
-        _args: Self::Args,
-    ) -> binread::prelude::BinResult<Self> {
+        _endian: binrw::Endian,
+        _args: Self::Args<'_>,
+    ) -> binrw::BinResult<Self> {
         let pos = reader.stream_position()?;
         let raw: u64 = reader.read_le()?;
 
         match WinTimestamp::new(&raw.to_le_bytes()) {
             Ok(timestamp) => Ok(Self(timestamp, raw)),
-            Err(why) => Err(binread::Error::AssertFail {
+            Err(why) => Err(binrw::Error::AssertFail {
                 pos,
                 message: format!("{why}"),
             }),

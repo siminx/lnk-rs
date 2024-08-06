@@ -1,6 +1,6 @@
 use core::panic;
 
-use binread::BinRead;
+use binrw::BinRead;
 use bitflags::bitflags;
 use encoding_rs::Encoding;
 use getset::Getters;
