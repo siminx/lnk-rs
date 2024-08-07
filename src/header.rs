@@ -1,6 +1,7 @@
 #![allow(missing_docs)]
 use std::mem::size_of;
 
+use binrw::binread;
 use binrw::{binrw, BinRead};
 use bitflags::bitflags;
 use byteorder::{ByteOrder, LE};
@@ -22,7 +23,7 @@ use crate::Guid;
 /// structures.
 #[derive(Clone, Debug, Getters, MutGetters, Setters)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-#[binrw]
+#[binread]
 #[br(little)]
 #[getset(get = "pub", get_mut = "pub", set = "pub")]
 pub struct ShellLinkHeader {
