@@ -1,6 +1,6 @@
 use std::fmt;
 
-use binrw::{BinRead, BinReaderExt};
+use binrw::{BinRead, BinReaderExt, BinWrite};
 use chrono::NaiveDateTime;
 
 #[cfg(feature = "serde")]
@@ -37,6 +37,19 @@ impl BinRead for FileTime {
                 message: format!("{why}"),
             }),
         }
+    }
+}
+
+impl BinWrite for FileTime {
+    type Args<'a> = ();
+
+    fn write_options<W: std::io::Write + std::io::Seek>(
+        &self,
+        writer: &mut W,
+        _endian: binrw::Endian,
+        _args: Self::Args<'_>,
+    ) -> binrw::BinResult<()> {
+        self.1.write_le(writer)
     }
 }
 
@@ -86,5 +99,46 @@ impl From<NaiveDateTime> for FileTime {
 impl From<FileTime> for u64 {
     fn from(val: FileTime) -> Self {
         val.1
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Cursor;
+
+    use binrw::{BinReaderExt, BinWrite};
+    use winstructs::timestamp::WinTimestamp;
+
+    use super::FileTime;
+
+
+    #[test]
+    fn test_guid_be() {
+        let mut cursor = Cursor::new([0u8; 16]);
+        let input = test_data();
+
+        input.write_be(&mut cursor).unwrap();
+        cursor.set_position(0);
+        let output: FileTime = cursor.read_be().unwrap();
+        assert_eq!(input.0.to_datetime(), output.0.to_datetime());
+        assert_eq!(input.1, output.1);
+    }
+
+    #[test]
+    fn test_guid_le() {
+        let mut cursor = Cursor::new([0u8; 16]);
+        let input = test_data();
+
+        input.write_le(&mut cursor).unwrap();
+        cursor.set_position(0);
+        let output: FileTime = cursor.read_le().unwrap();
+        assert_eq!(input.0.to_datetime(), output.0.to_datetime());
+        assert_eq!(input.1, output.1);
+    }
+
+    fn test_data() -> FileTime {
+        let raw = 123456789000u64;
+        let timestamp = WinTimestamp::new(&raw.to_le_bytes()).unwrap();
+        FileTime(timestamp, raw)
     }
 }

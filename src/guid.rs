@@ -1,7 +1,6 @@
 use std::fmt::Display;
 
 use binrw::{BinRead, BinWrite};
-use num_traits::ToBytes;
 #[cfg(feature = "serde")]
 use serde::Serialize;
 use uuid::{Builder, Uuid};
