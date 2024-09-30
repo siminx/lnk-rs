@@ -43,7 +43,7 @@ use serde::Serialize;
 use thiserror::Error;
 
 use std::io::BufReader;
-#[cfg(feature="binwrite")]
+#[cfg(feature = "binwrite")]
 use std::io::BufWriter;
 use std::path::Path;
 use std::{fs::File, io::Seek};
@@ -182,8 +182,8 @@ impl ShellLink {
     /// Save a shell link.
     ///
     /// Note that this doesn't save any [`ExtraData`](struct.ExtraData.html) entries.
-    #[cfg(feature="binwrite")]
-    #[cfg_attr(feature="binwrite", stability::unstable(feature = "binwrite"))]
+    #[cfg(feature = "binwrite")]
+    #[cfg_attr(feature = "binwrite", stability::unstable(feature = "binwrite"))]
     pub fn save<P: AsRef<std::path::Path>>(&self, path: P) -> Result<(), Error> {
         use binrw::BinWrite;
 
@@ -342,13 +342,17 @@ impl ShellLink {
                     .to_string()
             };
 
-            let separator = if base_path.ends_with('\\') { "" } else { "\\" };
-
             let common_path = info
                 .common_path_suffix_unicode()
                 .as_ref()
                 .map(|s| &s[..])
                 .unwrap_or(info.common_path_suffix());
+
+            let separator = if common_path.is_empty() || base_path.ends_with('\\') {
+                ""
+            } else {
+                "\\"
+            };
 
             Some(format!("{base_path}{separator}{common_path}"))
         } else {
