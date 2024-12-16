@@ -153,8 +153,8 @@ impl ShellLink {
         if cfg!(windows) {
             // Remove symbol for long path if present.
             let can_os = canonical.as_os_str().to_str().unwrap();
-            if can_os.starts_with("\\\\?\\") {
-                canonical = PathBuf::new().join(&can_os[4..]).into_boxed_path();
+            if let Some(stripped) = can_os.strip_prefix("\\\\?\\") {
+                canonical = PathBuf::new().join(stripped).into_boxed_path();
             }
         }
 
@@ -179,7 +179,7 @@ impl ShellLink {
     /// Save a shell link.
     ///
     /// Note that this doesn't save any [`ExtraData`](struct.ExtraData.html) entries.
-    pub fn save<P: AsRef<std::path::Path>>(&self, path: P) -> std::io::Result<()> {
+    pub fn save<P: AsRef<std::path::Path>>(&self, path: P) -> Result<(), Error> {
         use binrw::BinWrite;
 
         let mut w = BufWriter::new(File::create(path)?);
@@ -187,7 +187,7 @@ impl ShellLink {
         debug!("Writing header...");
         // Invoke binwrite
         self.header()
-            .write_options(&mut w, binrw::Endian::Little, ());
+            .write_options(&mut w, binrw::Endian::Little, ())?;
 
         // let link_flags = *self.header().link_flags();
 

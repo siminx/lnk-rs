@@ -91,12 +91,6 @@ pub struct LinkInfo {
             }
         )
     )]
-
-    /// A 32-bit, unsigned integer that specifies the location of the
-    /// CommonNetworkRelativeLink field. If the
-    /// CommonNetworkRelativeLinkAndPathSuffix flag is set, this value is an
-    /// offset, in bytes, from the start of the LinkInfo structure; otherwise,
-    /// this value MUST be zero.
     common_network_relative_link_offset: u32,
 
     /// CommonPathSuffixOffset (4 bytes): A 32-bit, unsigned integer that
@@ -329,7 +323,6 @@ pub struct VolumeID {
     /// If the value of the VolumeLabelOffset field is not 0x00000014, this
     /// field MUST NOT be present; instead, the value of the VolumeLabelOffset
     /// field MUST be used to locate the volume label string.
-
     #[br(if(volume_label_offset == 0x14))]
     volume_label_offset_unicode: Option<u32>,
 

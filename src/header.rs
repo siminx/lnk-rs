@@ -1,5 +1,3 @@
-use std::mem::size_of;
-
 use binrw::BinWrite;
 use binrw::{binrw, BinRead};
 use getset::{Getters, MutGetters, Setters};
@@ -19,8 +17,6 @@ pub use link_flags::LinkFlags;
 
 mod file_attributes_flags;
 pub use file_attributes_flags::FileAttributeFlags;
-
-#[allow(clippy::unusual_byte_groupings)]
 
 /// A ShellLinkHeader structure (section 2.1), which contains identification
 /// information, timestamps, and flags that specify the presence of optional
@@ -106,7 +102,7 @@ impl Default for ShellLinkHeader {
     /// Create a new, blank, ShellLinkHeader
     fn default() -> Self {
         Self {
-            header_size: size_of::<Self>() as u32,
+            header_size: 0x4c,
             link_clsid: Guid::from(uuid::uuid!("00021401-0000-0000-C000-000000000046")),
             link_flags: LinkFlags::IS_UNICODE,
             file_attributes: FileAttributeFlags::FILE_ATTRIBUTE_NORMAL,

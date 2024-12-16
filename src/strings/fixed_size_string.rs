@@ -30,7 +30,7 @@ impl BinRead for FixedSizeString {
             });
         }
         let mut res = cow.to_string();
-        if let Some(last_character) = res.find(|x| x == '\u{0000}') {
+        if let Some(last_character) = res.find('\u{0000}') {
             res = res.substring(0, last_character).to_string();
         }
         Ok(Self(res))
