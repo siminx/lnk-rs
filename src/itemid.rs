@@ -1,7 +1,6 @@
 use core::fmt;
 
 use binrw::BinRead;
-use byteorder::{ByteOrder, LE};
 use getset::Getters;
 use serde::Serialize;
 

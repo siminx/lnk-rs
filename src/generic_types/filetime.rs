@@ -111,7 +111,6 @@ mod tests {
 
     use super::FileTime;
 
-
     #[test]
     fn test_guid_be() {
         let mut cursor = Cursor::new([0u8; 16]);

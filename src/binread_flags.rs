@@ -13,7 +13,7 @@ macro_rules! binread_flags {
                     binrw::Endian::Big => reader.read_be()?,
                     binrw::Endian::Little => reader.read_le()?,
                 };
-                
+
                 match Self::from_bits(raw) {
                     Some(res) => Ok(res),
                     None => Err(binrw::Error::AssertFail {
@@ -26,7 +26,7 @@ macro_rules! binread_flags {
 
         impl binrw::BinWrite for $type {
             type Args<'a> = ();
-        
+
             fn write_options<W: std::io::Write + std::io::Seek>(
                 &self,
                 writer: &mut W,

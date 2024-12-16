@@ -34,17 +34,14 @@
 
 use binrw::BinReaderExt;
 use encoding_rs::Encoding;
-use getset::Getters;
+use getset::{Getters, MutGetters};
 #[allow(unused)]
 use log::{debug, error, info, trace, warn};
 #[cfg(feature = "serde")]
 use serde::Serialize;
 use thiserror::Error;
 
-use std::io::BufReader;
-#[cfg(feature = "experimental_save")]
-use std::io::BufWriter;
-#[cfg(feature = "experimental_save")]
+use std::io::{BufReader, BufWriter};
 use std::path::Path;
 use std::{fs::File, io::Seek};
 
@@ -70,6 +67,7 @@ pub mod linkinfo;
 pub use linkinfo::LinkInfo;
 
 mod stringdata;
+pub use stringdata::StringData;
 
 /// Structures from the ExtraData section of the Shell Link.
 pub mod extradata;
@@ -82,8 +80,6 @@ pub use generic_types::idlist::*;
 
 mod current_offset;
 pub use current_offset::*;
-
-use crate::stringdata::StringData;
 
 mod strings;
 pub use strings::*;
@@ -105,13 +101,13 @@ pub enum Error {
     NotAShellLinkError,
 
     #[error("Error while parsing: {0}")]
-    BinReadError(#[from] binrw::Error)
+    BinReadError(#[from] binrw::Error),
 }
 
 /// A shell link
-#[derive(Debug, Getters)]
+#[derive(Debug, Getters, MutGetters)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-#[getset(get = "pub")]
+#[getset(get = "pub", get_mut = "pub")]
 pub struct ShellLink {
     /// returns the [`ShellLinkHeader`] structure
     header: header::ShellLinkHeader,
@@ -147,10 +143,10 @@ impl Default for ShellLink {
 }
 
 impl ShellLink {
-    #[cfg(feature = "experimental_save")]
     /// Create a new ShellLink pointing to a location, with otherwise default settings.
     pub fn new_simple<P: AsRef<Path>>(to: P) -> std::io::Result<Self> {
         use std::fs;
+        use std::path::PathBuf;
 
         let meta = fs::metadata(&to)?;
         let mut canonical = fs::canonicalize(&to)?.into_boxed_path();
@@ -164,16 +160,10 @@ impl ShellLink {
 
         let mut sl = Self::default();
 
-        let mut flags = LinkFlags::IS_UNICODE;
-        sl.header_mut().set_link_flags(flags);
         if meta.is_dir() {
             sl.header_mut()
                 .set_file_attributes(FileAttributeFlags::FILE_ATTRIBUTE_DIRECTORY);
         } else {
-            flags |= LinkFlags::HAS_WORKING_DIR
-                | LinkFlags::HAS_RELATIVE_PATH
-                | LinkFlags::HAS_LINK_INFO;
-            sl.header_mut().set_link_flags(flags);
             sl.set_relative_path(Some(format!(
                 ".\\{}",
                 canonical.file_name().unwrap().to_str().unwrap()
@@ -181,97 +171,98 @@ impl ShellLink {
             sl.set_working_dir(Some(
                 canonical.parent().unwrap().to_str().unwrap().to_string(),
             ));
-            sl.link_info = Some(_);
         }
 
         Ok(sl)
     }
 
-    #[cfg(feature = "experimental_save")]
     /// Save a shell link.
     ///
     /// Note that this doesn't save any [`ExtraData`](struct.ExtraData.html) entries.
     pub fn save<P: AsRef<std::path::Path>>(&self, path: P) -> std::io::Result<()> {
+        use binrw::BinWrite;
+
         let mut w = BufWriter::new(File::create(path)?);
 
         debug!("Writing header...");
-        let header_data: [u8; 0x4c] = self.shell_link_header.into();
-        w.write_all(&header_data)?;
+        // Invoke binwrite
+        self.header()
+            .write_options(&mut w, binrw::Endian::Little, ());
 
-        let link_flags = *self.header().link_flags();
+        // let link_flags = *self.header().link_flags();
 
-        if link_flags.contains(LinkFlags::HAS_LINK_TARGET_ID_LIST) {
-            if let None = self.linktarget_id_list {
-                error!("LinkTargetIDList not specified but expected!")
-            }
-            debug!("A LinkTargetIDList is marked as present. Writing.");
-            let mut data: Vec<u8> = self.linktarget_id_list.clone().unwrap().into();
-            w.write_all(&mut data)?;
-        }
+        // if link_flags.contains(LinkFlags::HAS_LINK_TARGET_ID_LIST) {
+        //     if let None = self.linktarget_id_list {
+        //         error!("LinkTargetIDList not specified but expected!")
+        //     }
+        //     debug!("A LinkTargetIDList is marked as present. Writing.");
+        //     let mut data: Vec<u8> = self.linktarget_id_list.clone().unwrap().into();
+        //     w.write_all(&mut data)?;
+        // }
 
-        if link_flags.contains(LinkFlags::HAS_LINK_INFO) {
-            if let None = self.link_info {
-                error!("LinkInfo not specified but expected!")
-            }
-            debug!("LinkInfo is marked as present. Writing.");
-            let mut data: Vec<u8> = self.link_info.clone().unwrap().into();
-            w.write_all(&mut data)?;
-        }
+        // if link_flags.contains(LinkFlags::HAS_LINK_INFO) {
+        //     if let None = self.link_info {
+        //         error!("LinkInfo not specified but expected!")
+        //     }
+        //     debug!("LinkInfo is marked as present. Writing.");
+        //     let mut data: Vec<u8> = self.link_info.clone().unwrap().into();
+        //     w.write_all(&mut data)?;
+        // }
 
-        if link_flags.contains(LinkFlags::HAS_NAME) {
-            if self.name_string == None {
-                error!("Name not specified but expected!")
-            }
-            debug!("Name is marked as present. Writing.");
-            w.write_all(&stringdata::to_data(
-                self.name_string.as_ref().unwrap(),
-                link_flags,
-            ))?;
-        }
+        // if link_flags.contains(LinkFlags::HAS_NAME) {
+        //     if self.name_string == None {
+        //         error!("Name not specified but expected!")
+        //     }
+        //     debug!("Name is marked as present. Writing.");
+        //     w.write_all(&stringdata::to_data(
+        //         self.name_string.as_ref().unwrap(),
+        //         link_flags,
+        //     ))?;
+        // }
 
-        if link_flags.contains(LinkFlags::HAS_RELATIVE_PATH) {
-            if self.relative_path == None {
-                error!("Relative path not specified but expected!")
-            }
-            debug!("Relative path is marked as present. Writing.");
-            w.write_all(&stringdata::to_data(
-                self.relative_path.as_ref().unwrap(),
-                link_flags,
-            ))?;
-        }
+        // if link_flags.contains(LinkFlags::HAS_RELATIVE_PATH) {
+        //     if self.relative_path == None {
+        //         error!("Relative path not specified but expected!")
+        //     }
+        //     debug!("Relative path is marked as present. Writing.");
+        //     w.write_all(&stringdata::to_data(
+        //         self.relative_path.as_ref().unwrap(),
+        //         link_flags,
+        //     ))?;
+        // }
 
-        if link_flags.contains(LinkFlags::HAS_WORKING_DIR) {
-            if self.working_dir == None {
-                error!("Working Directory not specified but expected!")
-            }
-            debug!("Working dir is marked as present. Writing.");
-            w.write_all(&stringdata::to_data(
-                self.working_dir.as_ref().unwrap(),
-                link_flags,
-            ))?;
-        }
+        // if link_flags.contains(LinkFlags::HAS_WORKING_DIR) {
+        //     if self.working_dir == None {
+        //         error!("Working Directory not specified but expected!")
+        //     }
+        //     debug!("Working dir is marked as present. Writing.");
+        //     w.write_all(&stringdata::to_data(
+        //         self.working_dir.as_ref().unwrap(),
+        //         link_flags,
+        //     ))?;
+        // }
 
-        if link_flags.contains(LinkFlags::HAS_ARGUMENTS) {
-            if self.icon_location == None {
-                error!("Arguments not specified but expected!")
-            }
-            debug!("Arguments are marked as present. Writing.");
-            w.write_all(&stringdata::to_data(
-                self.command_line_arguments.as_ref().unwrap(),
-                link_flags,
-            ))?;
-        }
+        // if link_flags.contains(LinkFlags::HAS_ARGUMENTS) {
+        //     if self.icon_location == None {
+        //         error!("Arguments not specified but expected!")
+        //     }
+        //     debug!("Arguments are marked as present. Writing.");
+        //     w.write_all(&stringdata::to_data(
+        //         self.command_line_arguments.as_ref().unwrap(),
+        //         link_flags,
+        //     ))?;
+        // }
 
-        if link_flags.contains(LinkFlags::HAS_ICON_LOCATION) {
-            if self.icon_location == None {
-                error!("Icon Location not specified but expected!")
-            }
-            debug!("Icon Location is marked as present. Writing.");
-            w.write_all(&stringdata::to_data(
-                self.icon_location.as_ref().unwrap(),
-                link_flags,
-            ))?;
-        }
+        // if link_flags.contains(LinkFlags::HAS_ICON_LOCATION) {
+        //     if self.icon_location == None {
+        //         error!("Icon Location not specified but expected!")
+        //     }
+        //     debug!("Icon Location is marked as present. Writing.");
+        //     w.write_all(&stringdata::to_data(
+        //         self.icon_location.as_ref().unwrap(),
+        //         link_flags,
+        //     ))?;
+        // }
 
         Ok(())
     }
@@ -284,7 +275,7 @@ impl ShellLink {
         debug!("Opening {:?}", path.as_ref());
         let mut reader = BufReader::new(File::open(path)?);
         trace!("Reading file.");
-        
+
         let shell_link_header: ShellLinkHeader = reader.read_le()?;
         debug!("Shell header: {:#?}", shell_link_header);
 
@@ -321,12 +312,6 @@ impl ShellLink {
             string_data,
             extra_data,
         })
-    }
-
-    #[cfg(feature = "experimental_save")]
-    /// Get a mutable instance of the shell link's header
-    pub fn header_mut(&mut self) -> &mut ShellLinkHeader {
-        &mut self.shell_link_header
     }
 
     /// returns the full path of the link target. This information
@@ -366,43 +351,38 @@ impl ShellLink {
         }
     }
 
-    #[cfg(feature = "experimental_save")]
     /// Set the shell link's name
     pub fn set_name(&mut self, name: Option<String>) {
         self.header_mut()
             .update_link_flags(LinkFlags::HAS_NAME, name.is_some());
-        self.name_string = name;
+        self.string_data_mut().set_name_string(name);
     }
 
-    #[cfg(feature = "experimental_save")]
     /// Set the shell link's relative path
     pub fn set_relative_path(&mut self, relative_path: Option<String>) {
         self.header_mut()
             .update_link_flags(LinkFlags::HAS_RELATIVE_PATH, relative_path.is_some());
-        self.relative_path = relative_path;
+        self.string_data_mut().set_relative_path(relative_path);
     }
 
-    #[cfg(feature = "experimental_save")]
     /// Set the shell link's working directory
     pub fn set_working_dir(&mut self, working_dir: Option<String>) {
         self.header_mut()
             .update_link_flags(LinkFlags::HAS_WORKING_DIR, working_dir.is_some());
-        self.working_dir = working_dir;
+        self.string_data_mut().set_working_dir(working_dir);
     }
 
-    #[cfg(feature = "experimental_save")]
     /// Set the shell link's arguments
     pub fn set_arguments(&mut self, arguments: Option<String>) {
         self.header_mut()
             .update_link_flags(LinkFlags::HAS_ARGUMENTS, arguments.is_some());
-        self.command_line_arguments = arguments;
+        self.string_data_mut().set_command_line_arguments(arguments);
     }
 
-    #[cfg(feature = "experimental_save")]
     /// Set the shell link's icon location
     pub fn set_icon_location(&mut self, icon_location: Option<String>) {
         self.header_mut()
             .update_link_flags(LinkFlags::HAS_ICON_LOCATION, icon_location.is_some());
-        self.icon_location = icon_location;
+        self.string_data_mut().set_icon_location(icon_location);
     }
 }

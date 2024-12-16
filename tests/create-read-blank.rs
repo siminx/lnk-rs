@@ -20,9 +20,12 @@ fn create_read_blank() {
             .expect("Failed to save shortcut!");
 
         info!("Reading shortcut...");
-        let shortcut = lnk::ShellLink::open(TEST_FILE_NAME).unwrap();
+        let shortcut = lnk::ShellLink::open(TEST_FILE_NAME, encoding_rs::WINDOWS_1252).unwrap();
         println!("{:#?}", shortcut);
-        assert_eq!(shortcut.name(), &Some("Blank name".to_string()));
+        assert_eq!(
+            shortcut.string_data().name_string(),
+            &Some("Blank name".to_string())
+        );
     }
 
     info!("Cleaning up...");

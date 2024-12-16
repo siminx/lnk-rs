@@ -31,7 +31,7 @@ impl BinRead for IdList {
             // So, if there are less than 2 bytes available, there
             // is something wrong
             if bytes_to_read < 2 {
-                return Err(binrw::error::Error::AssertFail{
+                return Err(binrw::error::Error::AssertFail {
                     pos: reader.stream_position()?,
                     message: "not enough bytes to read".to_string(),
                 });
