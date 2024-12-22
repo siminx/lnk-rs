@@ -183,6 +183,7 @@ impl ShellLink {
     ///
     /// Note that this doesn't save any [`ExtraData`](struct.ExtraData.html) entries.
     #[cfg(feature="binwrite")]
+    #[cfg_attr(feature="binwrite", stability::unstable(feature = "binwrite"))]
     pub fn save<P: AsRef<std::path::Path>>(&self, path: P) -> Result<(), Error> {
         use binrw::BinWrite;
 

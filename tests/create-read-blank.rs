@@ -1,4 +1,3 @@
-#![cfg(feature="binwrite")]
 use log::info;
 
 use std::fs;
