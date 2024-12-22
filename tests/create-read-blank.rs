@@ -5,6 +5,7 @@ use std::fs;
 const TEST_FILE_NAME: &'static str = "temp.lnk";
 
 #[test]
+#[cfg(feature="binwrite")]
 fn create_read_blank() {
     pretty_env_logger::init();
 
