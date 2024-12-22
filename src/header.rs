@@ -1,5 +1,5 @@
+use binrw::BinRead;
 use binrw::BinWrite;
-use binrw::{binrw, BinRead};
 use getset::{Getters, MutGetters, Setters};
 use num_derive::FromPrimitive;
 
@@ -23,7 +23,8 @@ pub use file_attributes_flags::FileAttributeFlags;
 /// structures.
 #[derive(Clone, Debug, Getters, MutGetters, Setters)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-#[binrw]
+#[derive(BinRead)]
+#[cfg_attr(feature = "binwrite", derive(BinWrite))]
 // #[br(little)]
 #[getset(get = "pub", get_mut = "pub", set = "pub")]
 pub struct ShellLinkHeader {

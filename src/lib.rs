@@ -1,3 +1,4 @@
+#![allow(unexpected_cfgs)]
 #![warn(missing_docs)]
 
 //! # Shell Link parser and writer for Rust.
@@ -41,7 +42,9 @@ use log::{debug, error, info, trace, warn};
 use serde::Serialize;
 use thiserror::Error;
 
-use std::io::{BufReader, BufWriter};
+use std::io::BufReader;
+#[cfg(feature="binwrite")]
+use std::io::BufWriter;
 use std::path::Path;
 use std::{fs::File, io::Seek};
 
@@ -179,6 +182,7 @@ impl ShellLink {
     /// Save a shell link.
     ///
     /// Note that this doesn't save any [`ExtraData`](struct.ExtraData.html) entries.
+    #[cfg(feature="binwrite")]
     pub fn save<P: AsRef<std::path::Path>>(&self, path: P) -> Result<(), Error> {
         use binrw::BinWrite;
 

@@ -13,6 +13,7 @@ repository = "https://github.com/lilopkins/lnk-rs"
 
 [features]
 default = ["serde"]
+binwrite = []
 serde = ["dep:serde", "dep:serde_json", "bitflags/serde"]
 lnk2json = ["serde", "dep:clap", "dep:simplelog", "dep:clap-verbosity-flag", "dep:clio", "dep:anyhow"]
 
@@ -20,6 +21,11 @@ lnk2json = ["serde", "dep:clap", "dep:simplelog", "dep:clap-verbosity-flag", "de
 name = "lnk2json"
 path = "src/bin/lnk2json/main.rs"
 required-features = ["lnk2json"]
+
+[[example]]
+name = "create_lnk"
+path = "examples/create_lnk.rs"
+required-features = ["binwrite"]
 
 [dependencies]
 log = "0.4.11"
