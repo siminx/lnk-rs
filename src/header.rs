@@ -126,11 +126,20 @@ impl Default for ShellLinkHeader {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 #[brw(repr=u32)]
 pub enum ShowCommand {
+    Hide = 0x00,
     /// The application is open and its window is open in a normal fashion.
     ShowNormal = 0x01,
+    ShowMinimized = 0x02,
     /// The application is open, and keyboard focus is given to the application, but its window is
     /// not shown.
     ShowMaximized = 0x03,
+    ShowNoACtive = 0x04,
+    Show = 0x05,
+    Minimized = 0x06,
     /// The application is open, but its window is not shown. It is not given the keyboard focus.
     ShowMinNoActive = 0x07,
+    Showna = 0x08,
+    Restore = 0x09,
+    ShowDefault = 0x0a,
+    ForceMinimize = 0x0b,
 }
