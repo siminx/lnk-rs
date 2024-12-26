@@ -277,33 +277,33 @@ impl ShellLink {
         path: P,
         default_codepage: &'static Encoding,
     ) -> Result<Self, Error> {
-        debug!("Opening {:?}", path.as_ref());
+        trace!("Opening {:?}", path.as_ref());
         let mut reader = BufReader::new(File::open(path)?);
         trace!("Reading file.");
 
         let shell_link_header: ShellLinkHeader = reader.read_le()?;
-        debug!("Shell header: {:#?}", shell_link_header);
+        trace!("Shell header: {:#?}", shell_link_header);
 
         let mut linktarget_id_list = None;
         let link_flags = *shell_link_header.link_flags();
         if link_flags.contains(LinkFlags::HAS_LINK_TARGET_ID_LIST) {
-            debug!(
+            trace!(
                 "A LinkTargetIDList is marked as present. Parsing now at position 0x{:0x}",
                 reader.stream_position()?
             );
             let list: LinkTargetIdList = reader.read_le()?;
-            debug!("{:?}", list);
+            trace!("{:?}", list);
             linktarget_id_list = Some(list);
         }
 
         let mut link_info = None;
         if link_flags.contains(LinkFlags::HAS_LINK_INFO) {
-            debug!(
+            trace!(
                 "LinkInfo is marked as present. Parsing now at position 0x{:0x}",
                 reader.stream_position()?
             );
             let info: LinkInfo = reader.read_le_args((default_codepage,))?;
-            debug!("{:?}", info);
+            trace!("{:?}", info);
             link_info = Some(info);
         }
 
